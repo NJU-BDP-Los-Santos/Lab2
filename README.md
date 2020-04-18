@@ -25,3 +25,6 @@ Reference.md	# 用于记录参考
 
 
 
+## 配置方法
+
+详见：[配置方法](./IDEA_Config.md)
