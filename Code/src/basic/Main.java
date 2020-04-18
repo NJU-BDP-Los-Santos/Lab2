@@ -35,10 +35,11 @@ public class Main {
             job.setJarByClass(Main.class);
             job.setMapperClass(TonkenizerMapper.class);
             job.setReducerClass(SecondSortReducer.class);
+            job.setCombinerClass(MyCountCombiner.class);
             job.setOutputKeyClass(Text.class);
-            job.setOutputValueClass(Text.class);
-            job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(Text.class);
+            job.setOutputValueClass(IntWritable.class);
+//            job.setMapOutputKeyClass(Text.class);
+//            job.setMapOutputValueClass(Text.class);
             job.setInputFormatClass(TextInputFormat.class);
             FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
             FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
@@ -50,7 +51,7 @@ public class Main {
         }
     }
 
-    public static class TonkenizerMapper extends Mapper<LongWritable,Text,Text,Text>
+    public static class TonkenizerMapper extends Mapper<LongWritable,Text,Text,IntWritable>
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
@@ -82,7 +83,7 @@ public class Main {
             {
                 word.set(itr.nextToken());
                 Text word_filename = new Text(word + "#" + fileName);
-                context.write(word_filename, new Text("1"));
+                context.write(word_filename, new IntWritable(1));
 //                context.write(word, new Text(fileName));
             }
 //            for (Iterator<String> it = hashMap.keySet().iterator(); it.hasNext(); )
@@ -94,10 +95,22 @@ public class Main {
 //            }
         }
     }
-
-    public static class SecondSortReducer extends Reducer<Text, Text, Text, Text> {
+    public static class MyCountCombiner extends Reducer<Text, IntWritable, Text, IntWritable>{
         @Override
-        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException
+        protected void reduce(Text key, Iterable<IntWritable> values,
+                              Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+            int total=0;
+            for(IntWritable value:values)
+            {
+                total=total+value.get();
+            }
+            context.write(key, new IntWritable(total));
+        }
+    }
+
+    public static class SecondSortReducer extends Reducer<Text, IntWritable, Text, Text> {
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
         {
 //            HashMap<String, Integer> hashMap = new HashMap<>();
 //
@@ -136,7 +149,7 @@ public class Main {
 //            }
 //            float frequency = (float)sum / hashMap.keySet().size();
 //            context.write(key, new Text(String.valueOf(frequency)+","+stringBuilder.toString()));
-            Iterator<Text> it = values.iterator();
+            Iterator<IntWritable> it = values.iterator();
             StringBuilder all = new StringBuilder();
 //            if (it.hasNext())
 //                all.append(it.next().toString());
