@@ -58,14 +58,15 @@ public class Main {
         {
 
             FileSplit fileSplit = (FileSplit)context.getInputSplit();
-            String fileName = fileSplit.getPath().getName();
-            fileName = fileName.substring(0,fileName.lastIndexOf('.'));
-            fileName = fileName.substring(0,fileName.lastIndexOf('.'));
-
+            String fileName = fileSplit.getPath().getName(); // 获得当前文件的文件名
+//            String docName = fileName.substring(0,fileName.lastIndexOf('.'));
+//            docName = docName.substring(0,fileName.lastIndexOf('.')); // 获得小说的名字
+            String[] point_divide = fileName.split("\\.");
+            String docName = point_divide[0] + point_divide[1]; // 按照输出样例，消除了小说明中的.
             Text word = new Text();
 //            IntWritable count;
 //            HashMap<Text, Integer> hashMap = new HashMap<>();
-            StringTokenizer itr = new StringTokenizer(value.toString());
+            StringTokenizer tokens = new StringTokenizer(value.toString());
 //            while(itr.hasMoreTokens())
 //            {
 //                word.set(itr.nextToken());
@@ -79,10 +80,10 @@ public class Main {
 //                }
 //            }
 
-            while(itr.hasMoreTokens())
+            while(tokens.hasMoreTokens())
             {
-                word.set(itr.nextToken());
-                Text word_filename = new Text(word + "#" + fileName);
+                word.set(tokens.nextToken());
+                Text word_filename = new Text(word + "#" + docName);
                 context.write(word_filename, new IntWritable(1));
 //                context.write(word, new Text(fileName));
             }
