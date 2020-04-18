@@ -33,7 +33,7 @@ public class Main {
 
             Job job = new Job(conf, "Second Sort");
             job.setJarByClass(Main.class);
-            job.setMapperClass(TonkenizerMapper.class);
+            job.setMapperClass(TokenizerMapper.class);
             job.setReducerClass(SecondSortReducer.class);
             job.setCombinerClass(MyCountCombiner.class);
             job.setOutputKeyClass(Text.class);
@@ -51,7 +51,7 @@ public class Main {
         }
     }
 
-    public static class TonkenizerMapper extends Mapper<LongWritable,Text,Text,IntWritable>
+    public static class TokenizerMapper extends Mapper<LongWritable,Text,Text,IntWritable>
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
