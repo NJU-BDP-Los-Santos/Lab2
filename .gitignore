@@ -26,3 +26,12 @@ hs_err_pid*
 # IDEA File
 .idea/
 *.iml
+
+# for build jar
+*.MF
+
+# hadoop output
+Code/output
+
+# for hadoop input
+*txt
