@@ -15,7 +15,7 @@
 
 2. File -> Project Structure -> Libraries -> + -> Java，添加Hadoop的依赖。
 
-   ![image-20200418200631993](img/image-20200418200631993.png)
+   ![image-20200418200631993](./img/image-20200418200631993.png)
 
    均位于${HADOOP_HOME}/share/hadoop/下，需要：
 
@@ -33,7 +33,7 @@
 
    其中，`[part]`为对应的部分，比如这里建立`./src/test/`用来存储测试类`WordCount`。
 
-   ![image-20200418202034912](img/image-20200418202034912.png)
+   ![image-20200418202034912](./img/image-20200418202034912.png)
 
    *其中是Hadoop给出的官方WordCount代码。*
 
