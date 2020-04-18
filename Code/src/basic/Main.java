@@ -5,9 +5,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.lib.HashPartitioner;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -35,7 +37,7 @@ public class Main {
             job.setJarByClass(Main.class);
             job.setMapperClass(TokenizerMapper.class);
             job.setReducerClass(SecondSortReducer.class);
-            job.setCombinerClass(MyCountCombiner.class);
+            job.setCombinerClass(CombinerSameWordDoc.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(IntWritable.class);
 //            job.setMapOutputKeyClass(Text.class);
@@ -96,20 +98,40 @@ public class Main {
 //            }
         }
     }
-    public static class MyCountCombiner extends Reducer<Text, IntWritable, Text, IntWritable>{
+    public static class CombinerSameWordDoc extends Reducer<Text, IntWritable, Text, IntWritable>
+    {
+        /**
+         * 用来合并同一个 词语-小说 的组
+         * @param key
+         * @param values 同一个 词语-小说 的列表
+         * @param context
+         * @throws IOException
+         * @throws InterruptedException
+         */
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values,
                               Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
-            int total=0;
-            for(IntWritable value:values)
+            int total = 0;
+            for(IntWritable value: values)
             {
-                total=total+value.get();
+                total = total + value.get();
             }
             context.write(key, new IntWritable(total));
         }
     }
 
-    public static class SecondSortReducer extends Reducer<Text, IntWritable, Text, Text> {
+    public static class DividePartitioner extends HashPartitioner<Text, IntWritable>
+    {
+        @Override
+        public int getPartition(Text key, IntWritable value,
+                                int numPartitions) {
+            String real_key = key.toString().split("#")[0];
+            return super.getPartition(new Text(real_key), value, numPartitions);
+        }
+    }
+
+    public static class SecondSortReducer extends Reducer<Text, IntWritable, Text, Text>
+    {
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
         {
@@ -152,8 +174,7 @@ public class Main {
 //            context.write(key, new Text(String.valueOf(frequency)+","+stringBuilder.toString()));
             Iterator<IntWritable> it = values.iterator();
             StringBuilder all = new StringBuilder();
-//            if (it.hasNext())
-//                all.append(it.next().toString());
+
             while(it.hasNext())
             {
                 all.append(";");
