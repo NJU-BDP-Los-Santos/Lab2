@@ -5,11 +5,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.lib.HashPartitioner;
+//import org.apache.hadoop.mapred.lib.HashPartitioner;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Partitioner;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -38,6 +38,8 @@ public class Main {
             job.setMapperClass(TokenizerMapper.class);
             job.setReducerClass(SecondSortReducer.class);
             job.setCombinerClass(CombinerSameWordDoc.class);
+            job.setPartitionerClass(DividePartitioner.class);
+            job.setNumReduceTasks(4);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(IntWritable.class);
 //            job.setMapOutputKeyClass(Text.class);
@@ -132,6 +134,16 @@ public class Main {
 
     public static class SecondSortReducer extends Reducer<Text, IntWritable, Text, Text>
     {
+        String t_prev;
+        int worddoc_count; // 同键值的计数
+        String output_;
+        @Override
+        protected void setup(Context context)
+        {
+            t_prev = new String();
+            worddoc_count = 0;
+            output_ = new String();
+        }
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
         {
@@ -172,15 +184,35 @@ public class Main {
 //            }
 //            float frequency = (float)sum / hashMap.keySet().size();
 //            context.write(key, new Text(String.valueOf(frequency)+","+stringBuilder.toString()));
-            Iterator<IntWritable> it = values.iterator();
-            StringBuilder all = new StringBuilder();
-
-            while(it.hasNext())
+//            Iterator<IntWritable> it = values.iterator();
+//            StringBuilder all = new StringBuilder();
+//
+//            while(it.hasNext())
+//            {
+//                all.append(";");
+//                all.append(it.next().toString());
+//            }
+//            context.write(key, new Text(all.toString()));
+            int count = 0;
+            for (IntWritable value: values)
             {
-                all.append(";");
-                all.append(it.next().toString());
+                count += value.get();
             }
-            context.write(key, new Text(all.toString()));
+            String t = key.toString().split("#")[0];
+//            System.out.println(t);
+//            System.out.println(t_prev);
+            if (!t.equals(t_prev) && t_prev != null)
+            {
+                context.write(new Text(t_prev + ","), new Text(output_));
+                t_prev = t;
+                output_ = "";
+            }
+            output_ = output_ + key.toString().split("#")[1] + ":" + Integer.toString(count) + ";";
+        }
+        @Override
+        protected void cleanup(Context context) throws IOException, InterruptedException
+        {
+            context.write(new Text(t_prev + ","), new Text(output_));
         }
     }
 }
