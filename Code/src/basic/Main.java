@@ -29,11 +29,11 @@ public class Main {
             Configuration conf = new Configuration();
             String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
             if (otherArgs.length != 2) {
-                System.err.println("Usage: MinMaxCountDriver <in> <out>");
+                System.err.println("Usage: <in> <out>");
                 System.exit(2);
             }
 
-            Job job = new Job(conf, "Second Sort");
+            Job job = new Job(conf, "Inverted-Index-Basic");
             job.setJarByClass(Main.class);
             job.setMapperClass(TokenizerMapper.class);
             job.setReducerClass(MergeReducer.class);
@@ -163,6 +163,8 @@ public class Main {
 
     public static String doubleTransform(double num)
     {
+        // 首先需要进行一个四舍五入
+        num = Math.floor(num * 100) / 100;
         String strNum = num + "";
         int a = strNum.indexOf(".");
         if(a > 0)
