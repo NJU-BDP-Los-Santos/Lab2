@@ -163,6 +163,8 @@ public class Main {
 
     public static String doubleTransform(double num)
     {
+        // 首先需要进行一个四舍五入
+        num = Math.floor(num * 100) / 100;
         String strNum = num + "";
         int a = strNum.indexOf(".");
         if(a > 0)
