@@ -34,5 +34,5 @@ Reference.md	# 用于记录参考
 
 ### basic部分
 ```bash
-hadoop jar /home/2020st27/Lab2/basic.jar /data/exercise_2 /user/Lab2/output/basic
+hadoop jar /home/2020st27/Lab2/basic.jar /data/exercise_2 /user/2020st27/Lab2/output/basic
 ```
