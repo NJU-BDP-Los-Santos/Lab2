@@ -34,4 +34,6 @@ hs_err_pid*
 Code/output
 
 # for hadoop input
-*txt
+# *.txt
+# *.txt.segmented
+Code/input
