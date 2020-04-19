@@ -137,12 +137,16 @@ public class Main {
         String t_prev;
         int worddoc_count; // 同键值的计数
         String output_;
+        double words_sum;
+        double doc_sum;
         @Override
         protected void setup(Context context)
         {
             t_prev = new String();
             worddoc_count = 0;
             output_ = new String();
+            words_sum = 0.0;
+            doc_sum = 0.0;
         }
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
@@ -201,18 +205,55 @@ public class Main {
             String t = key.toString().split("#")[0];
 //            System.out.println(t);
 //            System.out.println(t_prev);
-            if (!t.equals(t_prev) && t_prev != null)
+            if (!t.equals(t_prev) && t_prev != null && !t_prev.equals(""))
             {
-                context.write(new Text(t_prev + ","), new Text(output_));
-                t_prev = t;
+                double average = words_sum / doc_sum;
+                context.write(new Text(t_prev + "\t" + doubleTransform(average) + ","), new Text(output_));
                 output_ = "";
+                words_sum = 0.0;
+                doc_sum = 0.0;
             }
+            words_sum += (double)count;
+            doc_sum += 1.0;
+            t_prev = t;
             output_ = output_ + key.toString().split("#")[1] + ":" + Integer.toString(count) + ";";
         }
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException
         {
-            context.write(new Text(t_prev + ","), new Text(output_));
+            double average = words_sum / doc_sum;
+            context.write(new Text(t_prev + "\t" + doubleTransform(average) + ","), new Text(output_));
+//            context.write(new Text(t_prev + ","), new Text(output_));
+        }
+    }
+
+    public static String doubleTransform(double num)
+    {
+        String strNum = num + "";
+        int a = strNum.indexOf(".");
+        if(a > 0)
+        {
+            //获取小数点后面的数字
+            String dianAfter = strNum.substring(a+1);
+            if("0".equals(dianAfter))
+            {
+                return strNum+"0";
+            }
+            else
+            {
+                if(dianAfter.length()==1)
+                {
+                    return strNum +"0";
+                }
+                else
+                {
+                    return strNum.substring(0, a+3);
+                }
+            }
+        }
+        else
+        {
+            return strNum+".00";
         }
     }
 }
