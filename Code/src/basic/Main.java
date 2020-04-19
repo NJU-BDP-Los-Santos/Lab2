@@ -33,7 +33,7 @@ public class Main {
                 System.exit(2);
             }
 
-            Job job = new Job(conf, "Second Sort");
+            Job job = new Job(conf, "Inverted-Index-Basic");
             job.setJarByClass(Main.class);
             job.setMapperClass(TokenizerMapper.class);
             job.setReducerClass(MergeReducer.class);
