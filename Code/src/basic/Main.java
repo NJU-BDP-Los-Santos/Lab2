@@ -29,7 +29,7 @@ public class Main {
             Configuration conf = new Configuration();
             String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
             if (otherArgs.length != 2) {
-                System.err.println("Usage: MinMaxCountDriver <in> <out>");
+                System.err.println("Usage: <in> <out>");
                 System.exit(2);
             }
 
