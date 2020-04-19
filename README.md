@@ -28,3 +28,11 @@ Reference.md	# 用于记录参考
 ## 配置方法
 
 详见：[配置方法MD](./IDEA_Config.md) [配置方法PDF](./IDEA_Config.pdf)
+
+
+## 运行指令
+
+### basic部分
+```bash
+hadoop jar /home/2020st27/Lab2/basic.jar /data/exercise_2 /user/Lab2/output/basic
+```
