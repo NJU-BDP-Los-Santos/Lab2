@@ -36,7 +36,7 @@ public class Main {
             Job job = new Job(conf, "Second Sort");
             job.setJarByClass(Main.class);
             job.setMapperClass(TokenizerMapper.class);
-            job.setReducerClass(SecondSortReducer.class);
+            job.setReducerClass(MergeReducer.class);
             job.setCombinerClass(CombinerSameWordDoc.class);
             job.setPartitionerClass(DividePartitioner.class);
             job.setNumReduceTasks(4);
@@ -63,41 +63,21 @@ public class Main {
 
             FileSplit fileSplit = (FileSplit)context.getInputSplit();
             String fileName = fileSplit.getPath().getName(); // 获得当前文件的文件名
-//            String docName = fileName.substring(0,fileName.lastIndexOf('.'));
-//            docName = docName.substring(0,fileName.lastIndexOf('.')); // 获得小说的名字
+
             String[] point_divide = fileName.split("\\.");
             String docName = point_divide[0] + point_divide[1]; // 按照输出样例，消除了小说明中的.
             Text word = new Text();
 //            IntWritable count;
 //            HashMap<Text, Integer> hashMap = new HashMap<>();
             StringTokenizer tokens = new StringTokenizer(value.toString());
-//            while(itr.hasMoreTokens())
-//            {
-//                word.set(itr.nextToken());
-//                if(hashMap.containsKey(word))
-//                {
-//                    hashMap.put(word, hashMap.get(word)+1);
-//                }
-//                else
-//                {
-//                    hashMap.put(word, 1);
-//                }
-//            }
 
             while(tokens.hasMoreTokens())
             {
                 word.set(tokens.nextToken());
-                Text word_filename = new Text(word + "#" + docName);
+                Text word_filename = new Text(word + "#" + docName); // 创建复合键
                 context.write(word_filename, new IntWritable(1));
 //                context.write(word, new Text(fileName));
             }
-//            for (Iterator<String> it = hashMap.keySet().iterator(); it.hasNext(); )
-//            {
-//                word = it.next();
-//                count = new IntWritable(hashMap.get(word));
-//                Text fileName_count = new Text(fileName+"#"+count);
-//                context.write(new Text(word), fileName_count);
-//            }
         }
     }
     public static class CombinerSameWordDoc extends Reducer<Text, IntWritable, Text, IntWritable>
@@ -132,7 +112,7 @@ public class Main {
         }
     }
 
-    public static class SecondSortReducer extends Reducer<Text, IntWritable, Text, Text>
+    public static class MergeReducer extends Reducer<Text, IntWritable, Text, Text>
     {
         String t_prev;
         int worddoc_count; // 同键值的计数
@@ -151,52 +131,6 @@ public class Main {
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
         {
-//            HashMap<String, Integer> hashMap = new HashMap<>();
-//
-//            String prevFile = "";
-//            int count = 0;
-//            for(Text val : values)
-//            {
-//                String fileName_count = val.toString();
-//                String fileName = fileName_count.substring(0, val.find("#"));
-//                String num = fileName_count.substring(val.find("#")+1,val.getLength());
-//                int tempCount = Integer.parseInt(num);
-//                if(prevFile.compareTo("") == 0)
-//                {
-//                    prevFile = fileName;
-//                }
-//                if(prevFile.compareTo(fileName) == 0)
-//                {
-//                    count += tempCount;
-//                }
-//                else
-//                {
-//                    hashMap.put(key.toString(), count);
-//                    count = 0;
-//                    prevFile = fileName;
-//                }
-//            }
-//
-//            int sum = 0;
-//            StringBuilder stringBuilder = new StringBuilder();
-//            for(Iterator<String> it = hashMap.keySet().iterator(); it.hasNext(); )
-//            {
-//                String docName = it.next();
-//                int tempCount = hashMap.get(docName);
-//                sum += tempCount;
-//                stringBuilder.append(docName+":"+String.valueOf(tempCount)+";");
-//            }
-//            float frequency = (float)sum / hashMap.keySet().size();
-//            context.write(key, new Text(String.valueOf(frequency)+","+stringBuilder.toString()));
-//            Iterator<IntWritable> it = values.iterator();
-//            StringBuilder all = new StringBuilder();
-//
-//            while(it.hasNext())
-//            {
-//                all.append(";");
-//                all.append(it.next().toString());
-//            }
-//            context.write(key, new Text(all.toString()));
             int count = 0;
             for (IntWritable value: values)
             {
