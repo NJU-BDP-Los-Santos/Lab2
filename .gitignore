@@ -37,3 +37,6 @@ Code/output
 # *.txt
 # *.txt.segmented
 Code/input
+
+# for java out
+Code/out
