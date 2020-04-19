@@ -21,16 +21,11 @@ public class MpSort {
     {
         try {
             Configuration conf = new Configuration();
-            /*String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-            if (otherArgs.length != 2) {
-                System.err.println("Usage: MinMaxCountDriver <in> <out>");
-                System.exit(2);
-            }*/
             //Get Job Instance
             Job job = Job.getInstance(conf, "Second Sort");
             //Set Jar
             job.setJarByClass(MpSort.class);
-            //set Map and Reduce functions
+            //set Map,Reduce and Partition functions
             job.setMapperClass(MpSort.SortMapper.class);
             job.setReducerClass(MpSort.SortReducer.class);
             job.setPartitionerClass(MpSort.SortPartition.class);
@@ -66,15 +61,15 @@ public class MpSort {
         {
             FileSplit fileSplit = (FileSplit)context.getInputSplit();
             String fileName = fileSplit.getPath().getName();
-
+            //check file name
             if(fileName.contains("SUCCESS")) return;
-
+            //word  frequency, doc1:t1;doc2:t2...  ->  "word" "frequency"
             String[] line = value.toString().split("[ \t]");
             Text word = new Text(line[0]);
             String sFloat = line[1].split(",")[0];
-
+            //check invalid input
             if(line.length < 2 || isDouble(sFloat) == false) return;
-
+            //emit <key,value> = <frequency,word>
             FloatWritable frequency = new FloatWritable(Float.valueOf(sFloat));
             context.write(frequency,word);
         }
@@ -84,6 +79,7 @@ public class MpSort {
     {
         @Override
         public int getPartition(FloatWritable key, Text value, int i) {
+            //get partition according to frequency
             float x = key.get();
             if(x < 1.333f) return 0;
             else if(x >= 1.333f && x < 1.701f) return 1;
@@ -97,6 +93,7 @@ public class MpSort {
         @Override
         protected void reduce(FloatWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException
         {
+            //sort function will be executed automatically by MapReduce Framework
             Float frequency = key.get();
             for(Text each : values)
             {
