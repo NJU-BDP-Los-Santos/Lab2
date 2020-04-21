@@ -153,7 +153,7 @@ public class Main {
                     Map.Entry<String, Double> mapEntry =itera_Entry.next();
                     double tf = mapEntry.getValue();
                     double tf_idf = tf*Math.log((mainCount/(doc_sum+1.0)));
-                    context.write(new Text( mapEntry.getKey() + "," +t_prev + "," + doubleTransform(tf_idf) + "\n"), new Text(""));
+                    context.write(new Text( mapEntry.getKey() + "," +t_prev + "," + doubleTransform(tf_idf)), new Text(""));
                     //System.out.println("键："+mapEntry.getKey()+" 值："+mapEntry.getValue());
                 }
                 //context.write(new Text(t_prev + "\t" + doubleTransform(average) + ","), new Text(output_));
@@ -183,7 +183,7 @@ public class Main {
                 Map.Entry<String, Double> mapEntry =itera_Entry.next();
                 double tf = mapEntry.getValue();
                 double tf_idf = tf*Math.log((218/(doc_sum+1.0)));
-                context.write(new Text( mapEntry.getKey() + "," +t_prev + "," + doubleTransform(tf_idf) + "\n"), new Text(""));
+                context.write(new Text( mapEntry.getKey() + "," +t_prev + "," + doubleTransform(tf_idf)), new Text(""));
                 //System.out.println("键："+mapEntry.getKey()+" 值："+mapEntry.getValue());
             }
         }
